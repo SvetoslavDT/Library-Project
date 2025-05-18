@@ -81,6 +81,11 @@ void LibraryUnit::setRating(unsigned short rating) // 5 star rating system
 	this->rating = rating;
 }
 
+void LibraryUnit::setUniqueNumber()
+{
+	uniqueNumber = rand() * rand(); // To be sure its unique
+}
+
 void LibraryUnit::copyFrom(const LibraryUnit& other)
 {
 	setTitle(other.title);
@@ -88,22 +93,25 @@ void LibraryUnit::copyFrom(const LibraryUnit& other)
 	setGenre(other.genre);
 	setBriefDescription(other.description);
 	setRating(other.rating);
+	setUniqueNumber();
+	setReleaseYear(other.releaseYear);
 }
 
-LibraryUnit::LibraryUnit(std::string title, std::string publisher, std::string genre,
-	std::string description, unsigned short releaseYear, unsigned short rating)
-	: releaseYear(releaseYear)
+LibraryUnit::LibraryUnit(const std::string& title, const std::string& publisher, const std::string& genre,
+	const std::string& description, unsigned short releaseYear, unsigned short rating)
+	: title(title), genre(genre), description(description), releaseYear(releaseYear)
 {
-	setTitle(title);
 	setPublisher(publisher);
-	setGenre(genre);
-	setBriefDescription(description);
 	setRating(rating);
+	setUniqueNumber();
 }
 
-LibraryUnit::LibraryUnit(const LibraryUnit& other) : releaseYear(other.releaseYear)
+LibraryUnit::LibraryUnit(const LibraryUnit& other) : title(other.title), genre(other.genre),
+description(other.description), releaseYear(other.releaseYear)
 {
-	copyFrom(other);
+	setPublisher(other.publisher);
+	setRating(other.rating);
+	setUniqueNumber();
 }
 
 LibraryUnit& LibraryUnit::operator=(const LibraryUnit& other)
@@ -113,4 +121,23 @@ LibraryUnit& LibraryUnit::operator=(const LibraryUnit& other)
 		copyFrom(other);
 	}
 	return *this;
+}
+
+std::string generateNString(size_t n)
+{
+	unsigned short i;
+	std::string result(n, 'X'); // Allocating space at the beginning
+
+	for (size_t j = 0; j < n; j++)
+	{
+		i = rand() % 10;
+		result[j] = fromDigitToChar(i);
+	}
+
+	return result;
+}
+
+char fromDigitToChar(unsigned short digit)
+{
+	return char('0' + digit);
 }
