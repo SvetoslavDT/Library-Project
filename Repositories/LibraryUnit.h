@@ -6,15 +6,13 @@ class LibraryUnit
 {
 public:
 
-	LibraryUnit() = delete;
-	LibraryUnit(std::string title, std::string publisher, std::string genre, std::string description,
-		unsigned short releaseYear, unsigned short rating);
+	LibraryUnit() = default;
+	LibraryUnit(const std::string& title, const std::string& publisher, const std::string& genre,
+		const std::string& description, unsigned short releaseYear, unsigned short rating);
 	virtual ~LibraryUnit() = default;
 
 	LibraryUnit(const LibraryUnit& other);
 	LibraryUnit& operator=(const LibraryUnit& other);
-
-	virtual LibraryUnit* clone() const = 0;
 
 	const std::string& getTitle() const;
 	const std::string& getPublisher() const;
@@ -30,6 +28,9 @@ public:
 	void setBriefDescription(const std::string& str);
 	void setReleaseYear(unsigned short year);
 	void setRating(unsigned short rating);
+	void setUniqueNumber(); // Gives unique number even when copying from other object
+
+	virtual LibraryUnit* clone() const = 0;
 
 protected:
 
@@ -45,3 +46,7 @@ private:
 
 	void copyFrom(const LibraryUnit& other);
 };
+
+std::string generateNString(size_t n); // should it be here ( declared here beacuse Book and the other use it)
+
+char fromDigitToChar(unsigned short digit);
