@@ -1,4 +1,4 @@
-#pragma once
+#include <iostream>
 
 template <typename T>
 class Optional
@@ -25,7 +25,30 @@ private:
 	T* _value = nullptr;
 };
 
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Optional<T>& obj) // ?? Correct?
+{
+	if (!obj.hasValue()) {
+		// No value, mark the stream failed
+		os.setstate(std::ios::failbit);
+		return os;
+	}
 
+	return os << obj.getValue();
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& is, Optional<T>& obj) // ?? Correct?
+{
+	T data;
+	if (!(is >> data)) {
+		obj.freeValue();
+		return is;
+	}
+
+	obj.setValue(data);
+	return is;
+}
 
 template<typename T>
 Optional<T>::Optional(const T& value) : _hasValue(true)
