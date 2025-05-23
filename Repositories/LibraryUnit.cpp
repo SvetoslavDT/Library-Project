@@ -107,7 +107,7 @@ LibraryUnit::LibraryUnit(const std::string& title, const std::string& publisher,
 }
 
 LibraryUnit::LibraryUnit(const LibraryUnit& other) : title(other.title), genre(other.genre),
-description(other.description), releaseYear(other.releaseYear)
+	description(other.description), releaseYear(other.releaseYear)
 {
 	setPublisher(other.publisher);
 	setRating(other.rating);
@@ -140,4 +140,9 @@ std::string generateNString(size_t n)
 char fromDigitToChar(unsigned short digit)
 {
 	return char('0' + digit);
+}
+
+bool LibraryUnit::isDigit(const char& ch) const
+{
+	return ch >= '0' && ch <= '9';
 }
