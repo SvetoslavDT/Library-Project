@@ -11,8 +11,8 @@ public:
 		const std::string& description, unsigned short releaseYear, unsigned short rating);
 	virtual ~LibraryUnit() = default;
 
-	LibraryUnit(const LibraryUnit& other);
-	LibraryUnit& operator=(const LibraryUnit& other);
+	LibraryUnit(const LibraryUnit& other); // Are they strong exception safe
+	LibraryUnit& operator=(const LibraryUnit& other); // Are they strong exception safe
 
 	const std::string& getTitle() const;
 	const std::string& getPublisher() const;
@@ -22,6 +22,8 @@ public:
 	const unsigned short getRating() const;
 	const unsigned getUniqueNumber() const;
 
+
+	//Should these be public1
 	void setTitle(const std::string& str);
 	void setPublisher(const std::string& str);
 	void setGenre(const std::string& str);
@@ -42,6 +44,7 @@ protected:
 	unsigned short rating;
 	unsigned uniqueNumber;
 
+	bool isDigit(const char& ch) const;
 private:
 
 	void copyFrom(const LibraryUnit& other);
