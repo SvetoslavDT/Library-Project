@@ -1,37 +1,87 @@
-#pragma once
-#include "LibraryUnit.h"
-#include "Optional.h"
+#include "Book.h"
+#include <stdexcept>
 
-using StringArray = std::vector<std::string>;
+const unsigned short Book::ISBN_LENGTH = 13;
 
-class Book : public virtual LibraryUnit
+Book::Book(const std::string& title, const std::string& publisher, const std::string& genre,
+	const std::string& description, unsigned short releaseYear, unsigned short rating,
+	const std::string& author, const std::string& isbn)
+	: LibraryUnit(title, publisher, genre, description, releaseYear, rating), author(author) 
 {
-public:
+	if (!isbn.empty())
+		setISBN(isbn);
 
-	Book() = default;
-	Book(const std::string& title, const std::string& publisher, const std::string& genre, const std::string& description,
-		unsigned short releaseYear, unsigned short rating, const std::string& author, const std::string& isbn = "");
-	Book(const Book& other);
-	Book& operator=(const Book& other);
-	~Book() = default;
+	pushKeyWords();
+}
 
-	const std::string getISBN() const; // ?? Pokaji na Tedo
-	const std::string& getAuthor() const;
-	const StringArray& getKeyWords() const;
+Book::Book(const Book& other) : LibraryUnit(other), author(other.author)
+{
+	if (other.ISBN)
+		ISBN.setValue(other.ISBN.getValue());
+	pushKeyWords();
+}
 
-	LibraryUnit* clone() const override;
+Book& Book::operator=(const Book& other)
+{
+	if (this != &other)
+	{
+		LibraryUnit::operator=(other);
+		author = other.author;
+		pushKeyWords();
+		// Not changing the ISBN, so it stays unique
+	}
+	return *this;
+}
 
-	//Should the setters be private ( I feel like I shouldnt mendle in how a book will be handled )
-	//I just have to give the possibility if needed
-	void pushKeyWords();
-	void setISBN(const std::string& str = generateNString(Book::ISBN_LENGTH));
-	void setAuthor(const std::string& name);
+const std::string Book::getISBN() const // ?? Tova dobre li e
+{
+	try
+	{
+		return ISBN.getValue();
+	}
+	catch (const std::exception&)
+	{
+		return "";
+	}
+}
 
-protected:
+const std::string& Book::getAuthor() const
+{
+	return author;
+}
 
-	Optional<std::string> ISBN; // should it has '-' betweeen numbers
-	std::string author;
-	StringArray keyWords; // treated as const
+const StringArray& Book::getKeyWords() const
+{
+	return keyWords;
+}
+
+LibraryUnit* Book::clone() const
+{
+	return new Book(*this);
+}
+
+void Book::pushKeyWords()
+{
+	keyWords.push_back(title);
+	keyWords.push_back(author);
+	keyWords.push_back(std::to_string(uniqueNumber));
+}
+
+void Book::setISBN(const std::string& str)
+{
+	if (str.length() != Book::ISBN_LENGTH)
+		throw std::invalid_argument("Given string is not in ISBN format");
 	
-	const static unsigned short ISBN_LENGTH;
-};
+	for (size_t i = 0; i < str.length(); i++)
+	{
+		if(!isDigit(str[i]))
+			throw std::invalid_argument("Given string is not in ISBN format");
+	}
+	
+	ISBN.setValue(str);
+}
+
+void Book::setAuthor(const std::string& name)
+{
+	author = name;
+}
