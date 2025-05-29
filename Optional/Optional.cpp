@@ -1,4 +1,4 @@
-#include <iostream>
+#pragma once
 
 template <typename T>
 class Optional
@@ -14,10 +14,16 @@ public:
 	bool hasValue() const;
 	const T& getValue() const;
 	void setValue(const T& other);
-	void freeValue();
+	void reset();
 
 	operator bool() const noexcept;
 	T& operator*();
+
+	friend std::ostream& operator<<(std::ostream& os, const Optional& obj);
+	friend std::istream& operator>>(std::istream& is, Optional& obj);
+
+	void writeToBinary(std::ostream& os) const;
+	void readFromFile(std::istream& is);
 
 private:
 
@@ -25,30 +31,7 @@ private:
 	T* _value = nullptr;
 };
 
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const Optional<T>& obj) // ?? Correct?
-{
-	if (!obj.hasValue()) {
-		// No value, mark the stream failed
-		os.setstate(std::ios::failbit);
-		return os;
-	}
 
-	return os << obj.getValue();
-}
-
-template<typename T>
-std::istream& operator>>(std::istream& is, Optional<T>& obj) // ?? Correct?
-{
-	T data;
-	if (!(is >> data)) {
-		obj.freeValue();
-		return is;
-	}
-
-	obj.setValue(data);
-	return is;
-}
 
 template<typename T>
 Optional<T>::Optional(const T& value) : _hasValue(true)
@@ -104,7 +87,7 @@ bool operator<=(const Optional<T>& lhs, const Optional<T>& rhs);
 template<typename T>
 Optional<T>::~Optional()
 {
-	freeValue();
+	reset();
 }
 
 template<typename T>
@@ -135,7 +118,7 @@ void Optional<T>::setValue(const T& other)
 }
 
 template<typename T>
-void Optional<T>::freeValue()
+void Optional<T>::reset()
 {
 	delete _value;
 	_value = nullptr;
@@ -188,4 +171,64 @@ template<typename T>
 bool operator<=(const Optional<T>& lhs, const Optional<T>& rhs)
 {
 	return (lhs == rhs) || (lhs < rhs);
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Optional<T>& obj) // ?? Correct?
+{
+	os << obj.hasValue() << '\n';
+	if (obj.hasValue())
+		os << obj.getValue();
+	else
+		os << '\n';
+	os << '\n'; //here
+
+	return os;
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& is, Optional<T>& obj)
+{
+	T value;
+	bool boolValue;
+
+	is >> boolValue;
+	if (boolValue)
+	{
+		is >> value;
+		obj.setValue(value);
+	}
+	else
+	{
+		is.ignore(1, '\n');
+	}
+
+	is.ignore(1, '\n');
+
+	return is;
+}
+
+template<typename T>
+void Optional<T>::writeToBinary(std::ostream& os) const
+{
+	os.write((const char*)&_hasValue, sizeof(_hasValue));
+	if (_hasValue)
+		os.write((const char*)_value, sizeof(T));
+}
+
+template<typename T>
+void Optional<T>::readFromFile(std::istream& is)
+{
+	is.read((char*)&_hasValue, sizeof(_hasValue));
+	if (_hasValue)
+	{
+		delete _value;
+		_value = new T;
+		is.read((char*)_value, sizeof(T));
+	}
+	else
+	{
+		delete _value;
+		_value = nullptr;
+	}
 }
