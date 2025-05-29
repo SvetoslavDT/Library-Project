@@ -1,0 +1,61 @@
+#pragma once
+#include "User.h"
+#include "Series.h"
+
+// op>> undone // is it needed is the ?
+
+class Reader : public User
+{
+public:
+
+	struct LibraryUnitTaken
+	{
+	public:
+		
+		LibraryUnitTaken() = default;
+		LibraryUnitTaken(const LibraryUnit* unit, const Date& borrowDate, const Date& returnDate);
+		LibraryUnitTaken(const LibraryUnitTaken& other);
+		LibraryUnitTaken& operator=(const LibraryUnitTaken& other);
+		~LibraryUnitTaken();
+
+		const LibraryUnit* getUnit() const;
+		const Date& getBorrowDate() const;
+		const Date& getReturnDate() const;
+
+		void seReturnDate(const Date& date);
+
+		friend std::ostream& operator<<(std::ostream& os, const LibraryUnitTaken& obj);
+		// friend std::istream& operator>>(std::istream& is, LibraryUnitTaken& obj);
+
+		void writeToBinary(std::ostream& os) const;
+		void readFromBinary(std::istream& is);
+
+	private:
+
+		LibraryUnit* unit = nullptr; // treated as const
+		Date borrowDate;
+		Date returnDate;
+	};
+
+	Reader() = default;
+	Reader(const std::string& name, const std::string& password);
+	Reader(const std::string& name, const std::string& password, const std::vector<LibraryUnitTaken>& arr);
+
+	const std::vector<LibraryUnitTaken> getTakenUnits() const;
+
+	void setTakenLibraryUnits(const std::vector<LibraryUnitTaken>& arr);
+
+	void addLibraryUnit(const LibraryUnit* unit, const Date& borrowDate, const Date& returnDate);
+
+	User* clone() const override;
+
+	friend std::ostream& operator<<(std::ostream& os, const Reader& obj);
+	// friend std::istream& operator>>(std::istream& is, Reader& obj);
+
+	void writeToBinary(std::ostream& os) const override;
+	void readFromBinary(std::istream& is) override;
+
+private:
+
+	std::vector<LibraryUnitTaken> takenUnits;
+};
