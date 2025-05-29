@@ -1,5 +1,7 @@
 #include "Book.h"
+#include "Functions.h"
 #include <stdexcept>
+#include <cctype>
 
 const unsigned short Book::ISBN_LENGTH = 13;
 
@@ -74,7 +76,7 @@ void Book::setISBN(const std::string& str)
 	
 	for (size_t i = 0; i < str.length(); i++)
 	{
-		if(!isDigit(str[i]))
+		if(!isdigit(str[i]))
 			throw std::invalid_argument("Given string is not in ISBN format");
 	}
 	
@@ -84,4 +86,59 @@ void Book::setISBN(const std::string& str)
 void Book::setAuthor(const std::string& name)
 {
 	author = name;
+}
+
+std::ostream& operator<<(std::ostream& os, const Book& obj)
+{
+	os << (const LibraryUnit&)obj;
+
+	os << obj.ISBN << '\n' << obj.author << '\n';
+	os << obj.keyWords.size() << '\n';
+	for (const std::string& kw : obj.keyWords)
+		os << kw << '\n';
+
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, Book& obj)
+{
+	is >> (LibraryUnit&)obj;
+
+	is >> obj.ISBN;
+	std::getline(is, obj.author);
+
+	size_t keyWordsCount;
+	std::string tmp;
+	is >> keyWordsCount;
+	is.ignore();
+	obj.keyWords.clear();
+	for (size_t i = 0; i < keyWordsCount; ++i) 
+	{
+		std::getline(is, tmp);
+		obj.keyWords.push_back(tmp);
+	}
+
+	return is;
+}
+
+void Book::writeToBinary(std::ostream& os) const
+{
+	LibraryUnit::writeToBinary(os);
+
+	ISBN.writeToBinary(os);
+
+	FunctionsForBinary::writeString(os, author);
+	
+	FunctionsForBinary::writeStringArray(os, keyWords);
+}
+
+void Book::readFromBinary(std::istream& is)
+{
+	LibraryUnit::readFromBinary(is);
+
+	ISBN.readFromFile(is);
+
+	author = FunctionsForBinary::readString(is);
+
+	keyWords = FunctionsForBinary::readStringArray(is);
 }
