@@ -1,8 +1,23 @@
 #include <iostream>
+#include "Optional.h"
 #include <string>
+#include "Book.h"
 
 int main()
 {
-	unsigned x = 69;
-	std::string str = std::to_string(x);
+	/*	Optional<int> opt;
+		opt.setValue(69);
+		Optional<int> opt2(69);
+		std::cout << opt.getValue() << std::endl << opt2.getValue() << std::endl;
+		bool yep = opt == opt2;
+		std::cout << yep;
+
+		Optional<std::string> str;
+		str.setValue("MAMKA MU");
+		std::cout << str.getValue();
+			*/
+
+	Book b("Pinokio", "Baba", "strah", "Description", 2004, 3, "Johny Depp");
+	b.setISBN(Book::generateISBN());
+	std::cout << b.getISBN();
 }
