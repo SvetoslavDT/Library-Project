@@ -1,5 +1,6 @@
 #include "Date.h"
 #include <ctime>
+#pragma warning(disable : 4996);
 
 const unsigned short Date::DAY_MONTH_LENGTH = 2;
 const unsigned short Date::YEAR_LENGTH = 4;
@@ -113,6 +114,8 @@ Date& Date::operator-=(unsigned month)
 	{
 		setDate(this->getDay(), DECEMBER - (month - this->getMonth()), this->getYear() - 1);
 	}
+
+		return *this;
 }
 
 Date& Date::operator+=(unsigned month)
@@ -127,6 +130,8 @@ Date& Date::operator+=(unsigned month)
 	{
 		setDate(this->getDay(), (this->getMonth() + month) - DECEMBER, this->getYear() + 1);
 	}
+	
+		return *this;
 }
 
 bool Date::checkDate(unsigned date) const
@@ -136,7 +141,7 @@ bool Date::checkDate(unsigned date) const
 
 	if (leapYear(getYear(date)))
 	{
-		if (getDay(date) != 28)
+		if (getDay(date) > 28)
 			return false;
 	}
 
@@ -150,7 +155,7 @@ bool Date::leapYear(unsigned year) const
 
 std::ostream& operator<<(std::ostream& os, const Date& date)
 {
-	return os << date;
+	return os << date.getDate();
 }
 
 std::istream& operator>>(std::istream& is, Date& date)
