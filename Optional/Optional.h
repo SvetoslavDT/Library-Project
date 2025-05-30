@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 template <typename T>
 class Optional
@@ -19,19 +20,32 @@ public:
 	operator bool() const noexcept;
 	T& operator*();
 
-	friend std::ostream& operator<<(std::ostream& os, const Optional& obj);
-	friend std::istream& operator>>(std::istream& is, Optional& obj);
-
 	void writeToBinary(std::ostream& os) const;
 	void readFromFile(std::istream& is);
-
+	
 private:
 
 	bool _hasValue = false;
 	T* _value = nullptr;
 };
 
+template<typename T>
+bool operator==(const Optional<T>& lhs, const Optional<T>& rhs);
 
+template<typename T>
+bool operator!=(const Optional<T>& lhs, const Optional<T>& rhs);
+
+template<typename T>
+bool operator>(const Optional<T>& lhs, const Optional<T>& rhs);
+
+template<typename T>
+bool operator<(const Optional<T>& lhs, const Optional<T>& rhs);
+
+template<typename T>
+bool operator>=(const Optional<T>& lhs, const Optional<T>& rhs);
+
+template<typename T>
+bool operator<=(const Optional<T>& lhs, const Optional<T>& rhs);
 
 template<typename T>
 Optional<T>::Optional(const T& value) : _hasValue(true)
@@ -67,27 +81,9 @@ Optional<T>& Optional<T>::operator=(const Optional& other)
 }
 
 template<typename T>
-bool operator==(const Optional<T>& lhs, const Optional<T>& rhs);
-
-template<typename T>
-bool operator!=(const Optional<T>& lhs, const Optional<T>& rhs);
-
-template<typename T>
-bool operator>(const Optional<T>& lhs, const Optional<T>& rhs);
-
-template<typename T>
-bool operator<(const Optional<T>& lhs, const Optional<T>& rhs);
-
-template<typename T>
-bool operator>=(const Optional<T>& lhs, const Optional<T>& rhs);
-
-template<typename T>
-bool operator<=(const Optional<T>& lhs, const Optional<T>& rhs);
-
-template<typename T>
 Optional<T>::~Optional()
 {
-	reset();
+	delete _value;
 }
 
 template<typename T>
@@ -134,7 +130,7 @@ Optional<T>::operator bool() const noexcept
 template<typename T>
 T& Optional<T>::operator*()
 {
-	return _value;
+	return getValue();
 }
 
 template<typename T>
