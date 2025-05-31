@@ -228,3 +228,32 @@ void Optional<T>::readFromFile(std::istream& is)
 		_value = nullptr;
 	}
 }
+
+template<>
+void Optional<std::string>::writeToBinary(std::ostream& os) const
+{
+	os.write((const char*)&_hasValue, sizeof(_hasValue));
+	if (_hasValue)
+	{
+		size_t len = _value->length();
+		os.write((const char*)&len, sizeof(len));
+		os.write(_value->data(), len);
+	}
+}
+
+template<>
+void Optional<std::string>::readFromFile(std::istream& is)
+{
+	is.read((char*)&_hasValue, sizeof(_hasValue));
+	if (_hasValue)
+	{
+		size_t len;
+		is.read((char*)&len, sizeof(len));
+		std::string tmp(len, '\0');
+		is.read(&tmp[0], len);
+		this->reset();
+		this->setValue(tmp);
+	}
+	else
+		this->reset();
+}
