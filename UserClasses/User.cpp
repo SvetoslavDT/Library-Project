@@ -65,12 +65,14 @@ void User::readFromBinary(std::istream& is)
 	lastLogin.readDateFromBinary(is);
 }
 
+void User::print(std::ostream& os) const
+{
+	os << name << '\n' << password << '\n' << registerDate << '\n' << lastLogin << '\n';
+}
+
 std::ostream& operator<<(std::ostream& os, const User& user)
 {
-	os << user.name          << '\n'
-		<< user.password     << '\n'
-		<< user.registerDate << '\n'
-		<< user.lastLogin    << '\n';
+	user.print(os);
 
 	return os;
 }
