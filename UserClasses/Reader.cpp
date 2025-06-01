@@ -120,12 +120,10 @@ std::ostream& operator<<(std::ostream& os, const Reader::LibraryUnitTaken& obj)
 	return os << *obj.unit << '\n' << obj.borrowDate << '\n' << obj.returnDate << '\n';
 }
 
-std::ostream& operator<<(std::ostream& os, const Reader& obj)
+void Reader::print(std::ostream& os) const
 {
-	os << (const User&)obj;
+	User::print(os);
 
-	for (size_t i = 0; i < obj.takenUnits.size(); i++)
-		os << obj.takenUnits[i];
-
-	return os;
+	for (size_t i = 0; i < takenUnits.size(); i++)
+		os << takenUnits[i];
 }
