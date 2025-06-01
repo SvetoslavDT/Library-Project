@@ -25,8 +25,10 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const User& user);
 	friend std::istream& operator>>(std::istream& is, User& user);
 
-	virtual void writeToBinary(std::ostream& os) const;
-	virtual void readFromBinary(std::istream& is);
+	virtual void writeToBinary(std::ostream& os) const = 0;
+	virtual void readFromBinary(std::istream& is) = 0;
+
+	virtual void print(std::ostream& os) const = 0;
 
 protected:
 
