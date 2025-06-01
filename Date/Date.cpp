@@ -2,8 +2,8 @@
 #include <ctime>
 #pragma warning(disable : 4996);
 
-const unsigned short Date::DAY_MONTH_LENGTH = 2;
-const unsigned short Date::YEAR_LENGTH = 4;
+const unsigned short Date::DAY_MONTH_LENGTH = 100;
+const unsigned short Date::YEAR_LENGTH = 10000;
 
 Date::Date()
 {
@@ -115,7 +115,7 @@ Date& Date::operator-=(unsigned month)
 		setDate(this->getDay(), DECEMBER - (month - this->getMonth()), this->getYear() - 1);
 	}
 
-		return *this;
+	return *this;
 }
 
 Date& Date::operator+=(unsigned month)
@@ -130,22 +130,26 @@ Date& Date::operator+=(unsigned month)
 	{
 		setDate(this->getDay(), (this->getMonth() + month) - DECEMBER, this->getYear() + 1);
 	}
-	
-		return *this;
+
+	return *this;
 }
 
 bool Date::checkDate(unsigned date) const
 {
-	if (date >= 100000000 || getMonth(date) > 12)
+	unsigned d = getDay(date);
+	unsigned m = getMonth(date);
+	unsigned y = getYear(date);
+
+	if (m < 1 || m > 12)
 		return false;
 
-	if (leapYear(getYear(date)))
-	{
-		if (getDay(date) > 28)
-			return false;
-	}
+	static constexpr int daysInMonth[] = { 0,31,28,31,30,31,30,31,31,30,31,30,31 };
 
-	return true;
+	int dim = daysInMonth[m];
+	if (m == 2 && leapYear(y))
+		dim = 29;
+
+	return (d >= 1 && d <= (unsigned)dim);
 }
 
 bool Date::leapYear(unsigned year) const
