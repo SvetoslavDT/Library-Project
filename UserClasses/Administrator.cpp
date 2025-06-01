@@ -79,13 +79,6 @@ bool Administrator::validEmail(const std::string& str) const
     return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const Administrator& obj)
-{
-    os << (User&)obj;
-
-    return os << obj.email << '\n';
-}
-
 void Administrator::writeToBinary(std::ostream& os) const
 {
     User::writeToBinary(os);
@@ -98,4 +91,11 @@ void Administrator::readFromBinary(std::istream& is)
     User::readFromBinary(is);
 
     email = FunctionsForBinary::readString(is);
+}
+
+void Administrator::print(std::ostream& os) const
+{
+    User::print(os);
+
+    os << email << '\n';
 }
