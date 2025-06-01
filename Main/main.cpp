@@ -6,6 +6,15 @@
 
 int main()
 {
+	User** users = new User * [2];
+	users[0] = new Reader("Svetoslav", "madmax");
+	users[1] = new Administrator("Svetoslavv", "mmmm", "ebasi@dali.com");
+	
+	for (size_t i = 0; i < 2; ++i)
+	{
+		std::cout << *users[i] << std::endl;
+	}
+	
 	/*
 	Date date;
 	std::cout << date.getDay() << '\n' << date.getMonth() << '\n' << date.getYear() << std::endl;
