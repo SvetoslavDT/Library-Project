@@ -4,7 +4,9 @@
 #include <stdexcept>
 #include <cctype>
 
-Periodical::Article::Article(const std::string& title, const std::string& author) : title(title), author(title) {}
+const unsigned short Periodical::ISSN_LENGTH = 8;
+
+Periodical::Article::Article(const std::string& title, const std::string& author) : title(title), author(author) {}
 
 const std::string Periodical::Article::getTitle() const
 {
@@ -59,23 +61,6 @@ Periodical::Periodical(const std::string& title, const std::string& publisher, c
 	if(!issn.empty())
 		setISSN(issn);
 	setMonth(month);
-}
-
-Periodical::Periodical(const Periodical& other) : LibraryUnit(other), articles(other.articles)
-{
-	if (other.ISSN)
-		ISSN.setValue(other.getISSN());
-	setMonth(other.month);
-}
-
-Periodical& Periodical::operator=(const Periodical& other)
-{
-	if (this != &other)
-	{
-		LibraryUnit::operator=(other);
-		setMonth(other.month);
-	}
-	return *this;
 }
 
 const unsigned short Periodical::getMonth() const
@@ -134,9 +119,6 @@ LibraryUnit* Periodical::clone() const
 std::ostream& operator<<(std::ostream& os, const Periodical::Article& obj)
 {
 	os << obj.title << '\n' << obj.author << '\n';
-	os << obj.keyWords.size() << '\n';
-	for (const std::string& kw : obj.keyWords)
-		os << kw << '\n';
 	return os;
 }
 
@@ -156,21 +138,6 @@ std::istream& operator>>(std::istream& is, Periodical::Article& obj)
 	}
 
 	return is;
-}
-
-std::ostream& operator<<(std::ostream& os, const Periodical& obj)
-{
-	os << (const LibraryUnit&)obj;
-
-	os << obj.month << '\n' << obj.ISSN << '\n';
-
-	os << obj.articles.size() << '\n';
-	for (size_t i = 0; i < obj.articles.size(); i++)
-	{
-		os << obj.articles[i]; // the op<< writes '\n\ after each iteration of the sycle
-	}
-
-	return os;
 }
 
 std::istream& operator>>(std::istream& is, Periodical& obj)
@@ -221,5 +188,20 @@ void Periodical::readFromBinary(std::istream& is)
 	for (size_t i = 0; i < size; i++)
 	{
 		articles[i].readFromBinary(is);
+	}
+}
+
+void Periodical::print(std::ostream& os) const
+{
+	LibraryUnit::print(os);
+
+	os << month << '\n' << ISSN << '\n';
+
+	os << articles.size() << '\n';
+	for (size_t i = 0; i < articles.size(); i++)
+	{
+		os << articles[i];
+		if (i != articles.size() - 1)
+			os << '\n';
 	}
 }
