@@ -49,11 +49,13 @@ public:
 
 	User* clone() const override;
 
-	friend std::ostream& operator<<(std::ostream& os, const Reader& obj);
+	//operator>> polymorf. called from User
 	// friend std::istream& operator>>(std::istream& is, Reader& obj);
 
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
+
+	void print(std::ostream& os) const override;
 
 private:
 
