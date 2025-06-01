@@ -111,6 +111,12 @@ void LibraryUnit::readFromBinary(std::istream& is)
 	is.read((char*)&uniqueNumber, sizeof(uniqueNumber));
 }
 
+void LibraryUnit::print(std::ostream& os) const
+{
+	os << title << '\n' << publisher << '\n' << genre << '\n' << description << '\n'
+		<< releaseYear << '\n' << rating << '\n' << uniqueNumber << '\n';
+}
+
 LibraryUnit::LibraryUnit(const std::string& title, const std::string& publisher, const std::string& genre,
 	const std::string& description, unsigned short releaseYear, unsigned short rating)
 	: title(title), genre(genre), description(description), releaseYear(releaseYear)
@@ -122,8 +128,7 @@ LibraryUnit::LibraryUnit(const std::string& title, const std::string& publisher,
 
 std::ostream& operator<<(std::ostream& os, const LibraryUnit& obj)
 {
-	os << obj.title << '\n' << obj.publisher << '\n' << obj.genre << '\n' << obj.description
-		<< obj.releaseYear << '\n' << obj.rating << '\n' << obj.uniqueNumber << '\n';
+	obj.print(os);
 
 	return os;
 }
