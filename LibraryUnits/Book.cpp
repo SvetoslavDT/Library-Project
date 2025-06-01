@@ -1,142 +1,43 @@
-#include "Book.h"
+#pragma once
+#include "LibraryUnit.h"
+#include "Optional.h"
 #include "Functions.h"
-#include <stdexcept>
-#include <cctype>
 
-const unsigned short Book::ISBN_LENGTH = 13;
-
-Book::Book(const std::string& title, const std::string& publisher, const std::string& genre,
-	const std::string& description, unsigned short releaseYear, unsigned short rating,
-	const std::string& author, const std::string& isbn)
-	: LibraryUnit(title, publisher, genre, description, releaseYear, rating), author(author) 
+class Book : public virtual LibraryUnit
 {
-	if (!isbn.empty())
-		setISBN(isbn);
+public:
 
-	pushKeyWords();
-}
+	Book() = default;
+	Book(const std::string& title, const std::string& publisher, const std::string& genre, const std::string& description,
+		unsigned short releaseYear, unsigned short rating, const std::string& author, const std::string& isbn = "");
+	Book(const Book& other);
+	Book& operator=(const Book& other);
 
-Book::Book(const Book& other) : LibraryUnit(other), author(other.author)
-{
-	if (other.ISBN.hasValue())
-	{
-		ISBN.setValue(other.ISBN.getValue());
-	}
-	pushKeyWords();
-}
+	const std::string getISBN() const; // ?? Pokaji na Tedo
+	const std::string& getAuthor() const;
+	const StringArray& getKeyWords() const;
 
-Book& Book::operator=(const Book& other)
-{
-	if (this != &other)
-	{
-		LibraryUnit::operator=(other);
-		author = other.author;
-		pushKeyWords();
-		if(other.ISBN.hasValue())
-			ISBN.setValue(other.ISBN.getValue());
-	}
-	return *this;
-}
+	LibraryUnit* clone() const override;
 
-const std::string Book::getISBN() const // ?? Tova dobre li e
-{
-	try
-	{
-		return ISBN.getValue();
-	}
-	catch (const std::exception&)
-	{
-		return "";
-	}
-}
+	//Should the setters be private ( I feel like I shouldnt mendle in how a book will be handled )
+	//I just have to give the possibility if needed
+	void pushKeyWords();
+	void setISBN(const std::string& str = generateNString(Book::ISBN_LENGTH));
+	void setAuthor(const std::string& name);
 
-const std::string& Book::getAuthor() const
-{
-	return author;
-}
+	//operator>> polymorf. called from LibraryUnit
+	friend std::istream& operator>>(std::istream& is, Book& obj);
 
-const StringArray& Book::getKeyWords() const
-{
-	return keyWords;
-}
+	void writeToBinary(std::ostream& os) const override;
+	void readFromBinary(std::istream& is) override;
 
-LibraryUnit* Book::clone() const
-{
-	return new Book(*this);
-}
+	void print(std::ostream& os) const override;
 
-void Book::pushKeyWords()
-{
-	keyWords.push_back(title);
-	keyWords.push_back(author);
-	keyWords.push_back(std::to_string(uniqueNumber));
-}
+protected:
 
-void Book::setISBN(const std::string& str)
-{
-	if (str.length() != Book::ISBN_LENGTH)
-		throw std::invalid_argument("Given string is not in ISBN format");
+	Optional<std::string> ISBN;
+	std::string author;
+	StringArray keyWords;
 	
-	for (size_t i = 0; i < str.length(); i++)
-	{
-		if(!isdigit(str[i]))
-			throw std::invalid_argument("Given string is not in ISBN format");
-	}
-	
-	ISBN.setValue(str);
-}
-
-void Book::setAuthor(const std::string& name)
-{
-	author = name;
-}
-
-std::istream& operator>>(std::istream& is, Book& obj)
-{
-	is >> (LibraryUnit&)obj;
-
-	is >> obj.ISBN;
-	std::getline(is, obj.author);
-
-	size_t keyWordsCount;
-	std::string tmp;
-	is >> keyWordsCount;
-	is.ignore();
-	obj.keyWords.clear();
-	for (size_t i = 0; i < keyWordsCount; ++i) 
-	{
-		std::getline(is, tmp);
-		obj.keyWords.push_back(tmp);
-	}
-
-	return is;
-}
-
-void Book::writeToBinary(std::ostream& os) const
-{
-	LibraryUnit::writeToBinary(os);
-
-	ISBN.writeToBinary(os);
-
-	FunctionsForBinary::writeString(os, author);
-	
-	FunctionsForBinary::writeStringArray(os, keyWords);
-}
-
-void Book::readFromBinary(std::istream& is)
-{
-	LibraryUnit::readFromBinary(is);
-
-	ISBN.readFromFile(is);
-
-	author = FunctionsForBinary::readString(is);
-
-	keyWords = FunctionsForBinary::readStringArray(is);
-}
-
-void Book::print(std::ostream& os) const
-{
-	LibraryUnit::print(os);
-
-	os << author << '\n' << ISBN;
-}
+	const static unsigned short ISBN_LENGTH;
+};
