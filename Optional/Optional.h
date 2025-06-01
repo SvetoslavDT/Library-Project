@@ -174,10 +174,7 @@ std::ostream& operator<<(std::ostream& os, const Optional<T>& obj) // ?? Correct
 {
 	os << obj.hasValue() << '\n';
 	if (obj.hasValue())
-		os << obj.getValue();
-	else
-		os << '\n';
-	os << '\n'; //here
+		os << obj.getValue() << '\n';
 
 	return os;
 }
@@ -230,7 +227,7 @@ void Optional<T>::readFromFile(std::istream& is)
 }
 
 template<>
-void Optional<std::string>::writeToBinary(std::ostream& os) const
+inline void Optional<std::string>::writeToBinary(std::ostream& os) const
 {
 	os.write((const char*)&_hasValue, sizeof(_hasValue));
 	if (_hasValue)
@@ -242,7 +239,7 @@ void Optional<std::string>::writeToBinary(std::ostream& os) const
 }
 
 template<>
-void Optional<std::string>::readFromFile(std::istream& is)
+inline void Optional<std::string>::readFromFile(std::istream& is)
 {
 	is.read((char*)&_hasValue, sizeof(_hasValue));
 	if (_hasValue)
