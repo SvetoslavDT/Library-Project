@@ -18,8 +18,10 @@ Book::Book(const std::string& title, const std::string& publisher, const std::st
 
 Book::Book(const Book& other) : LibraryUnit(other), author(other.author)
 {
-	if (other.ISBN)
+	if (other.ISBN.hasValue())
+	{
 		ISBN.setValue(other.ISBN.getValue());
+	}
 	pushKeyWords();
 }
 
@@ -30,7 +32,8 @@ Book& Book::operator=(const Book& other)
 		LibraryUnit::operator=(other);
 		author = other.author;
 		pushKeyWords();
-		// Not changing the ISBN, so it stays unique
+		if(other.ISBN.hasValue())
+			ISBN.setValue(other.ISBN.getValue());
 	}
 	return *this;
 }
@@ -88,18 +91,6 @@ void Book::setAuthor(const std::string& name)
 	author = name;
 }
 
-std::ostream& operator<<(std::ostream& os, const Book& obj)
-{
-	os << (const LibraryUnit&)obj;
-
-	os << obj.ISBN << '\n' << obj.author << '\n';
-	os << obj.keyWords.size() << '\n';
-	for (const std::string& kw : obj.keyWords)
-		os << kw << '\n';
-
-	return os;
-}
-
 std::istream& operator>>(std::istream& is, Book& obj)
 {
 	is >> (LibraryUnit&)obj;
@@ -141,4 +132,11 @@ void Book::readFromBinary(std::istream& is)
 	author = FunctionsForBinary::readString(is);
 
 	keyWords = FunctionsForBinary::readStringArray(is);
+}
+
+void Book::print(std::ostream& os) const
+{
+	LibraryUnit::print(os);
+
+	os << author << '\n' << ISBN;
 }
