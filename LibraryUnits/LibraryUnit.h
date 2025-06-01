@@ -36,8 +36,10 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const LibraryUnit& obj);
 	friend std::istream& operator>>(std::istream& is, LibraryUnit& obj);
 
-	virtual void writeToBinary(std::ostream& os) const;
-	virtual void readFromBinary(std::istream& is);
+	virtual void writeToBinary(std::ostream& os) const = 0;
+	virtual void readFromBinary(std::istream& is) = 0;
+
+	virtual void print(std::ostream& os) const = 0;
 
 protected:
 
