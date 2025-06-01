@@ -3,7 +3,7 @@
 Series::Series(const std::string& title, const std::string& publisher, const std::string& genre,
 	const std::string& description, unsigned short releaseYear, unsigned short rating,
 	const std::string& author, unsigned short month, const std::vector<Article>& articles,
-	const std::string& isbn = "", const std::string& issn = "")
+	const std::string& isbn, const std::string& issn)
 	: LibraryUnit(title, publisher, genre, description, releaseYear, rating),
 	  Book(title, publisher, genre, description, releaseYear, rating, author, isbn),
 	  Periodical(title, publisher, genre, description, releaseYear, rating, month, articles, issn) {}
@@ -25,12 +25,17 @@ void Series::readFromBinary(std::istream& is)
 	Periodical::readFromBinary(is);
 }
 
-std::ostream& operator<<(std::ostream& os, const Series& obj)
+void Series::print(std::ostream& os) const
 {
-	os << (const Book&)obj;
-	os << (const Periodical&)obj;
+	Book::print(os);
 
-	return os;
+	os << month << '\n' << ISSN << '\n';
+	os << articles.size() << '\n';
+	for (size_t i = 0; i < articles.size(); i++)
+	{
+		os << articles[i];
+		os << '\n';
+	}
 }
 
 std::istream& operator>>(std::istream& is, const Series& obj)
