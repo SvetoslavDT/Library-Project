@@ -41,8 +41,6 @@ public:
 	Periodical(const std::string& title, const std::string& publisher, const std::string& genre, const std::string& description,
 		unsigned short releaseYear, unsigned short rating, unsigned short month, const std::vector<Article>& articles,
 		const std::string& issn = "");
-	Periodical(const Periodical& other);
-	Periodical& operator=(const Periodical& other);
 
 	const unsigned short getMonth() const;
 	const std::vector<Article>& getArticles() const;
@@ -54,17 +52,19 @@ public:
 
 	LibraryUnit* clone() const override;
 
-	friend std::ostream& operator<<(std::ostream& os, const Periodical& obj);
+	//operator>> polymorf. called from LibraryUnit
 	friend std::istream& operator>>(std::istream& is, Periodical& obj);
 
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
 
-private:
+	void print(std::ostream& os) const override;
+
+	const static unsigned short ISSN_LENGTH;
+
+protected:
 
 	unsigned short month;
 	Optional<std::string> ISSN;
 	std::vector<Article> articles;
-
-	const static unsigned short ISSN_LENGTH;
 };
