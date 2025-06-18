@@ -59,41 +59,68 @@ void User::writeToBinary(std::ostream& os) const
 
 void User::readFromBinary(std::istream& is)
 {
-	name = FunctionsForBinary::readString(is);
-	password = FunctionsForBinary::readString(is);
-	registerDate.readDateFromBinary(is);
-	lastLogin.readDateFromBinary(is);
+	std::string tmpName = FunctionsForBinary::readString(is);
+	std::string tmpPass = FunctionsForBinary::readString(is);
+	Date tmpRegDate;
+	Date tmpLastLog;
+	tmpRegDate.readDateFromBinary(is);
+	tmpLastLog.readDateFromBinary(is);
+
+	name = std::move(tmpName);
+	password = std::move(tmpPass);
+	registerDate = tmpRegDate;
+	lastLogin = tmpLastLog;
 }
 
-void User::print(std::ostream& os) const
+void User::serialise(std::ostream& os) const
 {
 	os << name << '\n' << password << '\n' << registerDate << '\n' << lastLogin << '\n';
 }
 
-std::ostream& operator<<(std::ostream& os, const User& user)
-{
-	user.print(os);
-
-	return os;
-}
-
-std::istream& operator>>(std::istream& is, User& user) // ?? strong exception safe li e
+void User::deserialize(std::istream& is)
 {
 	std::string name, password;
 	Date reg;
 	Date last;
 
-	if (!std::getline(is, name)) return is;
-	if (!std::getline(is, password)) return is;
-	if (!(is >> reg)) return is;
-	if (!(is >> last)) return is;
+	if (!std::getline(is, name)) throw std::exception("Stream failed");
+	if (!std::getline(is, password)) throw std::exception("Stream failed");
+	if (!(is >> reg)) throw std::exception("Stream failed");
+	if (!(is >> last)) throw std::exception("Stream failed");
 
-	is.ignore(1, '\n');
+	is.ignore(1024, '\n');
 
-	user.name = name;
-	user.password = password;
-	user.registerDate = reg;
-	user.lastLogin = last;
+	if (last < reg)
+		throw std::logic_error("Registration date can not be after last the last login.");
+
+	setName(name);
+	setPassword(password);
+	this->registerDate = reg;
+	this->lastLogin = last;
+}
+
+void User::print() const
+{
+	std::cout << "Name - " << name << '\n';
+	std::cout << "Register date - " << registerDate << '\n';
+	std::cout << "Last login - " << lastLogin << '\n';
+}
+
+unsigned User::getPrintLines() const
+{
+	return 4;
+}
+
+std::ostream& operator<<(std::ostream& os, const User& user)
+{
+	user.serialise(os);
+
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, User& user)
+{
+	user.deserialize(is);
 
 	return is;
 }
