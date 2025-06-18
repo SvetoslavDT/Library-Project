@@ -30,6 +30,8 @@ public:
 		void writeToBinary(std::ostream& os) const;
 		void readFromBinary(std::istream& is);
 
+		void print() const;
+
 	private:
 
 		std::string title;
@@ -44,27 +46,34 @@ public:
 
 	const unsigned short getMonth() const;
 	const std::vector<Article>& getArticles() const;
-	const std::string getISSN() const;
+	std::vector<Article>& getArticles();
+	const Optional<std::string>& getISSN() const;
 
 	void setMonth(unsigned short newMonth);
 	void setArticles(const std::vector<Article>& newArticles);
 	void setISSN(const std::string& issn = generateNString(Periodical::ISSN_LENGTH));
+	void addArticle(const Article& newArticle);
 
 	LibraryUnit* clone() const override;
-
-	//operator>> polymorf. called from LibraryUnit
-	friend std::istream& operator>>(std::istream& is, Periodical& obj);
 
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
 
-	void print(std::ostream& os) const override;
+	virtual void serialise(std::ostream& os) const override;
+	virtual void deserialize(std::istream& is) override;
 
-	const static unsigned short ISSN_LENGTH;
+	void print() const override;
+	std::string getType() const override;
+	unsigned getPrintLines() const override;
 
 protected:
 
 	unsigned short month;
 	Optional<std::string> ISSN;
 	std::vector<Article> articles;
+
+	const static unsigned short ISSN_LENGTH;
 };
+
+bool operator==(const Periodical::Article& lhs, const Periodical::Article& rhs);
+bool operator!=(const Periodical::Article& lhs, const Periodical::Article& rhs);
