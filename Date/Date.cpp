@@ -102,35 +102,32 @@ void Date::readDateFromBinary(std::istream& is)
 	is.read((char*)&date, sizeof(date));
 }
 
-Date& Date::operator-=(unsigned month)
+Date& Date::operator-=(unsigned months)
 {
-	const unsigned DECEMBER = 12;
+	unsigned m = getMonth(), y = getYear(), d = getDay();
 
-	if (this->getMonth() > month)
-	{
-		setDate(this->getDay(), this->getMonth() - month, this->getYear());
-	}
-	else
-	{
-		setDate(this->getDay(), DECEMBER - (month - this->getMonth()), this->getYear() - 1);
-	}
+	int total = y * 12 + m - months - 1;
+	y = total / 12;
+	m = (total % 12) + 1;
 
+	unsigned maxD = daysInMonth(m, y);
+	unsigned newD = std::min(d, maxD);
+	setDate(newD, m, y);
 	return *this;
 }
 
-Date& Date::operator+=(unsigned month)
+Date& Date::operator+=(unsigned months)
 {
-	const unsigned DECEMBER = 12;
+	unsigned d = getDay(), m = getMonth(), y = getYear();
 
-	if (this->getMonth() + month <= DECEMBER)
-	{
-		setDate(this->getDay(), this->getMonth() + month, this->getYear());
-	}
-	else
-	{
-		setDate(this->getDay(), (this->getMonth() + month) - DECEMBER, this->getYear() + 1);
-	}
+	unsigned total = y * 12 + (m - 1) + months;
+	y = total / 12;
+	m = (total % 12) + 1;
 
+	unsigned maxD = daysInMonth(m, y);
+	unsigned newD = (d <= maxD ? d : maxD);
+
+	setDate(newD, m, y);
 	return *this;
 }
 
@@ -157,9 +154,19 @@ bool Date::leapYear(unsigned year) const
 	return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 }
 
+unsigned Date::daysInMonth(unsigned month, unsigned year) const
+{
+	static const unsigned days[] = { 0,31,28,31,30,31,30,31,31,30,31,30,31 };
+	if (month == 2)
+	{
+		return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 29 : 28;
+	}
+	return days[month];
+}
+
 std::ostream& operator<<(std::ostream& os, const Date& date)
 {
-	return os << date.getDate();
+	return os << date.getDay() << '.' << date.getMonth() << '.' << date.getYear();
 }
 
 std::istream& operator>>(std::istream& is, Date& date)
