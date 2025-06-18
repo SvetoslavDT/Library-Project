@@ -14,11 +14,13 @@ public:
 
 	LibraryUnit* clone() const override;
 
-	//operator>> polymorf. called from LibraryUnit
-	friend std::istream& operator>>(std::istream& is, const Series& obj);
-
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
 
-	void print(std::ostream& os) const override;
+	virtual void serialise(std::ostream& os) const override;
+	virtual void deserialize(std::istream& is) override;
+
+	void print() const override;
+	std::string getType() const override;
+	unsigned getPrintLines() const override;
 };
