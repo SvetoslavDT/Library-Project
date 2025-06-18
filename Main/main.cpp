@@ -1,20 +1,43 @@
 #include <iostream>
-#include "Optional.h"
-#include "Series.h"
-#include "Administrator.h"
-#include "Reader.h"
+#include "System.h"
 
 int main()
 {
-	User** users = new User * [2];
+	System::getSystem().run();
+
+
+
+	/*
+	LibraryUnit* book = new Book("Ti", "Toi", "Tq", "To", 2004, 4, "Az");
+std::cout << std::endl;
+Reader reader("spens", "123");
+Date returnDate, getDate;
+Date b;  // current
+Date t = b; t += 1;
+reader.addLibraryUnit(book, b, t);
+std::cout << std::endl;
+
+auto c = book->clone();
+c->print();
+delete c;
+
+Reader::LibraryUnitTaken x(book, b, t);
+Reader::LibraryUnitTaken y = x;
+
+delete book;
+*/
+
+	/*
+		User** users = new User * [2];
 	users[0] = new Reader("Svetoslav", "madmax");
 	users[1] = new Administrator("Svetoslavv", "mmmm", "ebasi@dali.com");
-	
+
 	for (size_t i = 0; i < 2; ++i)
 	{
 		std::cout << *users[i] << std::endl;
 	}
-	
+	*/
+
 	/*
 	Date date;
 	std::cout << date.getDay() << '\n' << date.getMonth() << '\n' << date.getYear() << std::endl;
