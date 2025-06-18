@@ -90,12 +90,37 @@ void Administrator::readFromBinary(std::istream& is)
 {
     User::readFromBinary(is);
 
-    email = FunctionsForBinary::readString(is);
+    std::string tmpEmail = FunctionsForBinary::readString(is);
+    email = std::move(tmpEmail);
 }
 
-void Administrator::print(std::ostream& os) const
+void Administrator::serialise(std::ostream& os) const
 {
-    User::print(os);
+    User::serialise(os);
 
     os << email << '\n';
+}
+
+void Administrator::deserialize(std::istream& is)
+{
+    User::deserialize(is);
+
+    is >> email;
+}
+
+void Administrator::print() const
+{
+    User::print();
+
+    std::cout << "Email - " << email << '\n';
+}
+
+std::string Administrator::getType() const
+{
+    return "Administrator";
+}
+
+unsigned Administrator::getPrintLines() const
+{
+    return User::getPrintLines() + 1;
 }
