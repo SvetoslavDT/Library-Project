@@ -27,8 +27,13 @@ public:
 
 	virtual void writeToBinary(std::ostream& os) const = 0;
 	virtual void readFromBinary(std::istream& is) = 0;
+	
+	virtual void serialise(std::ostream& os) const = 0;
+	virtual void deserialize(std::istream& is) = 0;
 
-	virtual void print(std::ostream& os) const = 0;
+	virtual void print() const = 0;
+	virtual std::string getType() const = 0;
+	virtual unsigned getPrintLines() const = 0;
 
 protected:
 
