@@ -48,9 +48,19 @@ void Periodical::Article::writeToBinary(std::ostream& os) const
 
 void Periodical::Article::readFromBinary(std::istream& is)
 {
-	title = FunctionsForBinary::readString(is);
-	author = FunctionsForBinary::readString(is);
-	keyWords = FunctionsForBinary::readStringArray(is);
+	std::string tmpTitle = FunctionsForBinary::readString(is);
+	std::string tmpAuthor = FunctionsForBinary::readString(is);
+	StringArray tmpKeyWords = FunctionsForBinary::readStringArray(is);
+
+	title = std::move(tmpTitle);
+	author = std::move(tmpAuthor);
+	keyWords = std::move(tmpKeyWords);
+}
+
+void Periodical::Article::print() const
+{
+	std::cout << "Title - " << title << '\n';
+	std::cout << "Author - " << author << '\n';
 }
 
 Periodical::Periodical(const std::string& title, const std::string& publisher, const std::string& genre,
@@ -73,16 +83,14 @@ const std::vector<Periodical::Article>& Periodical::getArticles() const
 	return articles;
 }
 
-const std::string Periodical::getISSN() const // ?? Tova dobre li e
+std::vector<Periodical::Article>& Periodical::getArticles()
 {
-	try
-	{
-		return ISSN.getValue();
-	}
-	catch (const std::exception&)
-	{
-		return "";
-	}
+	return articles;
+}
+
+const Optional<std::string>& Periodical::getISSN() const
+{
+	return ISSN;
 }
 
 void Periodical::setMonth(unsigned short newMonth)
@@ -111,6 +119,11 @@ void Periodical::setISSN(const std::string& issn)
 	ISSN.setValue(issn);
 }
 
+void Periodical::addArticle(const Article& newArticle)
+{
+	articles.push_back(newArticle);
+}
+
 LibraryUnit* Periodical::clone() const
 {
 	return new Periodical(*this);
@@ -124,39 +137,27 @@ std::ostream& operator<<(std::ostream& os, const Periodical::Article& obj)
 
 std::istream& operator>>(std::istream& is, Periodical::Article& obj)
 {
-	is >> obj.title >> obj.author;
+	std::string title;
+	std::string author;
 
-	size_t keyWordsCount;
-	std::string tmp;
-	is >> keyWordsCount;
-	is.ignore();
-	obj.keyWords.clear();
-	for (size_t i = 0; i < keyWordsCount; ++i)
-	{
-		std::getline(is, tmp);
-		obj.keyWords.push_back(tmp);
-	}
+	if (!(std::getline(is, title))) throw std::exception("Stream failed");
+	if (!(std::getline(is, author))) throw std::exception("Stream failed");
+
+	obj.setTitle(title);
+	obj.setAuthor(author);
+	obj.setKeyWords();
 
 	return is;
 }
 
-std::istream& operator>>(std::istream& is, Periodical& obj)
+bool operator==(const Periodical::Article& lhs, const Periodical::Article& rhs)
 {
-	is >> (LibraryUnit&)obj;
+	return lhs.getAuthor() == rhs.getAuthor() && lhs.getTitle() == rhs.getTitle();
+}
 
-	is >> obj.month >> obj.ISSN;
-
-	size_t articlesCount;
-	std::string temp;
-	is >> articlesCount;
-	is.ignore();
-	obj.articles.clear();
-	for (size_t i = 0; i < articlesCount; ++i)
-	{
-		is >> obj.articles[i];
-	}
-
-	return is;
+bool operator!=(const Periodical::Article& lhs, const Periodical::Article& rhs)
+{
+	return !(lhs == rhs);
 }
 
 void Periodical::writeToBinary(std::ostream& os) const
@@ -178,22 +179,32 @@ void Periodical::readFromBinary(std::istream& is)
 {
 	LibraryUnit::readFromBinary(is);
 
-	is.read((char*)&month, sizeof(month));
-	ISSN.readFromFile(is);
+	unsigned short tmpMonth;
+	is.read((char*)&tmpMonth, sizeof(tmpMonth));
 
-	size_t size;
-	is.read((char*)&size, sizeof(size));
-	articles.clear();
-	articles.resize(size);
-	for (size_t i = 0; i < size; i++)
+	Optional<std::string> tmpIssn;
+	tmpIssn.readFromFile(is);
+
+	size_t count;
+	is.read((char*)(&count), sizeof(count));
+
+	std::vector<Article> tmpArticles;
+	tmpArticles.reserve(count);
+	for (size_t i = 0; i < count; ++i)
 	{
-		articles[i].readFromBinary(is);
+		Article art;
+		art.readFromBinary(is);
+		tmpArticles.push_back(std::move(art));
 	}
+
+	month = tmpMonth;
+	ISSN = tmpIssn;
+	articles.swap(tmpArticles);
 }
 
-void Periodical::print(std::ostream& os) const
+void Periodical::serialise(std::ostream& os) const
 {
-	LibraryUnit::print(os);
+	LibraryUnit::serialise(os);
 
 	os << month << '\n' << ISSN << '\n';
 
@@ -201,7 +212,67 @@ void Periodical::print(std::ostream& os) const
 	for (size_t i = 0; i < articles.size(); i++)
 	{
 		os << articles[i];
-		if (i != articles.size() - 1)
-			os << '\n';
+		os << '\n';
 	}
+}
+
+void Periodical::deserialize(std::istream& is)
+{
+	LibraryUnit::deserialize(is);
+
+	unsigned short month;
+	Optional<std::string> issn;
+
+	if (!(is >> month)) throw std::exception("Stream failed");
+	if (!(is >> issn)) throw std::exception("Stream failed");
+
+	size_t articlesCount;
+	std::string temp;
+	is >> articlesCount;
+
+	std::vector<Article> newArticles(articlesCount);
+
+	for (size_t i = 0; i < articlesCount; ++i)
+	{
+		if(!(is >> newArticles[i])) throw std::exception("Stream failed");
+	}
+
+	setMonth(month);
+	setISSN(issn.getValue());
+	setArticles(newArticles);
+}
+
+void Periodical::print() const
+{
+	LibraryUnit::print();
+
+	std::cout << "Month - " << month << '\n';
+	if (ISSN.hasValue())
+	{
+		for (size_t i = 0; i < ISSN.getValue().length(); i++)
+		{
+			if (i == 4)
+				std::cout << '-';
+			std::cout << ISSN.getValue()[i];
+		}
+		std::cout << '\n';
+	}
+
+	std::cout << '\n';
+
+	for (size_t i = 0; i < articles.size(); i++)
+	{
+		articles[i].print();
+		std::cout << '\n';
+	}
+}
+
+std::string Periodical::getType() const
+{
+	return "Periodical";
+}
+
+unsigned Periodical::getPrintLines() const
+{
+	return 11 + articles.size() * 3;
 }
