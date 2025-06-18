@@ -1,5 +1,6 @@
 #include "LibraryUnit.h"
 #include "Functions.h"
+#include "Date.h"
 #include <exception>
 #include <stdexcept>
 
@@ -31,6 +32,26 @@ const unsigned short LibraryUnit::getReleaseYear() const
 const unsigned LibraryUnit::getUniqueNumber() const
 {
 	return uniqueNumber;
+}
+
+const unsigned short LibraryUnit::getCopies() const
+{
+	return copies;
+}
+
+unsigned short& LibraryUnit::getCopies()
+{
+	return copies;
+}
+
+const unsigned short LibraryUnit::getTaken() const
+{
+	return taken;
+}
+
+unsigned short& LibraryUnit::getTaken()
+{
+	return taken;
 }
 
 const unsigned short LibraryUnit::getRating() const
@@ -72,6 +93,8 @@ void LibraryUnit::setBriefDescription(const std::string& str)
 
 void LibraryUnit::setReleaseYear(unsigned short year)
 {
+	if (Date{}.getYear() < year)
+		throw std::invalid_argument("Year is not yet reached.");
 	releaseYear = year;
 }
 
@@ -87,6 +110,18 @@ void LibraryUnit::setUniqueNumber()
 	uniqueNumber = rand() * rand(); // To be sure its unique
 }
 
+LibraryUnit& LibraryUnit::operator++()
+{
+	++copies;
+	return *this;
+}
+
+LibraryUnit& LibraryUnit::operator--()
+{
+	--copies;
+	return *this;
+}
+
 void LibraryUnit::writeToBinary(std::ostream& os) const
 {
 	FunctionsForBinary::writeString(os, title);
@@ -97,48 +132,54 @@ void LibraryUnit::writeToBinary(std::ostream& os) const
 	os.write((const char*)&releaseYear, sizeof(releaseYear));
 	os.write((const char*)&rating, sizeof(rating));
 	os.write((const char*)&uniqueNumber, sizeof(uniqueNumber));
+
+	os.write((const char*)&copies, sizeof(copies));
+	os.write((const char*)&taken, sizeof(taken));
 }
 
 void LibraryUnit::readFromBinary(std::istream& is)
 {
-	title = FunctionsForBinary::readString(is);
-	publisher = FunctionsForBinary::readString(is);
-	genre = FunctionsForBinary::readString(is);
-	description = FunctionsForBinary::readString(is);
+	std::string tmpTitle = FunctionsForBinary::readString(is);
+	std::string tmpPublisher = FunctionsForBinary::readString(is);
+	std::string tmpGenre = FunctionsForBinary::readString(is);
+	std::string tmpDescription = FunctionsForBinary::readString(is);
 
-	is.read((char*)&releaseYear, sizeof(releaseYear));
-	is.read((char*)&rating, sizeof(rating));
-	is.read((char*)&uniqueNumber, sizeof(uniqueNumber));
+	unsigned short tmpReleaseYear, tmpRating, tmpCopies, tmpTaken;
+	unsigned tmpUniqueNumber;
+
+	is.read((char*)&tmpReleaseYear, sizeof(tmpReleaseYear));
+	is.read((char*)&tmpRating, sizeof(tmpRating));
+	is.read((char*)&tmpUniqueNumber, sizeof(tmpUniqueNumber));
+	is.read((char*)&tmpCopies, sizeof(tmpCopies));
+	is.read((char*)&tmpTaken, sizeof(tmpTaken));
+
+	title = std::move(tmpTitle);
+	publisher = std::move(tmpPublisher);
+	genre = std::move(tmpGenre);
+	description = std::move(tmpDescription);
+
+	releaseYear = tmpReleaseYear;
+	rating = tmpRating;
+	uniqueNumber = tmpUniqueNumber;
+	copies = tmpCopies;
+	taken = tmpTaken;
 }
 
-void LibraryUnit::print(std::ostream& os) const
+void LibraryUnit::serialise(std::ostream& os) const
 {
 	os << title << '\n' << publisher << '\n' << genre << '\n' << description << '\n'
-		<< releaseYear << '\n' << rating << '\n' << uniqueNumber << '\n';
+		<< releaseYear << '\n' << rating << '\n' << uniqueNumber << '\n'
+		<< copies << '\n' << taken << '\n';
 }
 
-LibraryUnit::LibraryUnit(const std::string& title, const std::string& publisher, const std::string& genre,
-	const std::string& description, unsigned short releaseYear, unsigned short rating)
-	: title(title), genre(genre), description(description), releaseYear(releaseYear)
-{
-	setPublisher(publisher);
-	setRating(rating);
-	setUniqueNumber();
-}
-
-std::ostream& operator<<(std::ostream& os, const LibraryUnit& obj)
-{
-	obj.print(os);
-
-	return os;
-}
-
-std::istream& operator>>(std::istream& is, LibraryUnit& obj)
+void LibraryUnit::deserialize(std::istream& is)
 {
 	std::string title, publisher, genre, description;
 	unsigned short release;
 	unsigned short rating;
 	unsigned uniqueNum;
+	unsigned short copies;
+	unsigned short taken;
 
 	if (!std::getline(is, title)) throw std::exception("Stream failed");
 	if (!std::getline(is, publisher)) throw std::exception("Stream failed");
@@ -147,16 +188,55 @@ std::istream& operator>>(std::istream& is, LibraryUnit& obj)
 	if (!(is >> release)) throw std::exception("Stream failed");
 	if (!(is >> rating)) throw std::exception("Stream failed");
 	if (!(is >> uniqueNum)) throw std::exception("Stream failed");
+	if(!(is >> copies)) throw std::exception("Stream failed");
+	if(!(is >> taken)) throw std::exception("Stream failed");
 
 	is.ignore(1, '\n');
 
-	obj.title = title;
-	obj.publisher = publisher;
-	obj.rating = rating;
-	obj.description = description;
-	obj.releaseYear = release;
-	obj.rating = rating;
-	obj.uniqueNumber = uniqueNum;
+	setTitle(title);
+	setPublisher(publisher);
+	setRating(rating);
+	setBriefDescription(description);
+	setReleaseYear(release);
+	setRating(rating);
+	this->uniqueNumber = uniqueNum;
+	this->copies = copies;
+	this->taken = taken;
+}
+
+void LibraryUnit::print() const
+{
+	std::cout << "Title - " << title << '\n';
+	std::cout << "Publisher - " << publisher << '\n';
+	std::cout << "Genre - " << genre << '\n';
+	std::cout << "Description - " << description << '\n';
+	std::cout << "Release year - " << releaseYear << '\n';
+	std::cout << "Rating - " << rating << '\n';
+	std::cout << "Unique number - " << uniqueNumber << '\n'; 
+	// std::cout << "Copies count - " << copies << '\n';
+	// std::cout << "Taken units - " << taken << '\n';
+}
+
+LibraryUnit::LibraryUnit(const std::string& title, const std::string& publisher, const std::string& genre,
+	const std::string& description, unsigned short releaseYear, unsigned short rating)
+	: title(title), genre(genre), description(description)
+{
+	setPublisher(publisher);
+	setRating(rating);
+	setUniqueNumber();
+	setReleaseYear(releaseYear);
+}
+
+std::ostream& operator<<(std::ostream& os, const LibraryUnit& obj)
+{
+	obj.serialise(os);
+
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, LibraryUnit& obj)
+{
+	obj.deserialize(is);
 
 	return is;
 }
