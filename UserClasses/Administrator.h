@@ -1,8 +1,6 @@
 #pragma once
 #include "User.h"
 
-// op>> needed??
-
 class Administrator : public User
 {
 public:
@@ -16,13 +14,15 @@ public:
 
 	User* clone() const override;
 
-	//operator>> polymorf. called from User
-	//friend std::istream& operator>>(std::istream& is, Administrator& obj);
-
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
 
-	void print(std::ostream& os) const override;
+	void serialise(std::ostream& os) const override;
+	void deserialize(std::istream& is) override;
+
+	void print() const override;
+	std::string getType() const override;
+	unsigned getPrintLines() const override;
 
 private:
 
