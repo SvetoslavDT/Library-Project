@@ -16,6 +16,7 @@ StringArray FunctionsForBinary::readStringArray(std::istream& is)
 	size_t count;
 	is.read((char*)&count, sizeof(count));
 	StringArray arr;
+	arr.reserve(count);
 	for (size_t i = 0; i < count; ++i)
 		arr.push_back(readString(is));
 	return arr;
@@ -32,6 +33,7 @@ std::string FunctionsForBinary::readString(std::istream& is)
 {
 	size_t len;
 	is.read((char*)&len, sizeof(len));
+
 	std::string str(len, '\0');
 	is.read(&str[0], len);
 	return str;
@@ -51,6 +53,35 @@ std::string generateNString(size_t n)
 	{
 		i = rand() % 10;
 		result[j] = fromDigitToChar(i);
+	}
+
+	return result;
+}
+
+std::vector<std::string> tokenizeString(const std::string& str)
+{
+	std::vector<std::string> result;
+	std::string word;
+
+	for (char ch : str)
+	{
+		if (std::isspace(static_cast<unsigned char>(ch)))
+		{
+			if (!word.empty())
+			{
+				result.push_back(word);
+				word.clear();
+			}
+		}
+		else
+		{
+			word += ch;
+		}
+	}
+
+	if (!word.empty())
+	{
+		result.push_back(word);
 	}
 
 	return result;
