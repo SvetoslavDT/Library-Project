@@ -170,7 +170,7 @@ bool operator<=(const Optional<T>& lhs, const Optional<T>& rhs)
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const Optional<T>& obj) // ?? Correct?
+std::ostream& operator<<(std::ostream& os, const Optional<T>& obj)
 {
 	os << obj.hasValue() << '\n';
 	if (obj.hasValue())
