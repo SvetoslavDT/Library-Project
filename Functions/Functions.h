@@ -1,4 +1,5 @@
 #pragma once
+#include "LibraryUnit.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -19,3 +20,5 @@ namespace FunctionsForBinary
 char fromDigitToChar(unsigned short digit);
 
 std::string generateNString(size_t n);
+
+std::vector<std::string> tokenizeString(const std::string& str);
