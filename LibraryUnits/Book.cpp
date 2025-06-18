@@ -1,43 +1,162 @@
-#pragma once
-#include "LibraryUnit.h"
-#include "Optional.h"
+#include "Book.h"
 #include "Functions.h"
+#include <stdexcept>
+#include <cctype>
 
-class Book : public virtual LibraryUnit
+const unsigned short Book::ISBN_LENGTH = 13;
+
+Book::Book(const std::string& title, const std::string& publisher, const std::string& genre,
+	const std::string& description, unsigned short releaseYear, unsigned short rating,
+	const std::string& author, const std::string& isbn)
+	: LibraryUnit(title, publisher, genre, description, releaseYear, rating), author(author) 
 {
-public:
+	if (!isbn.empty())
+		setISBN(isbn);
 
-	Book() = default;
-	Book(const std::string& title, const std::string& publisher, const std::string& genre, const std::string& description,
-		unsigned short releaseYear, unsigned short rating, const std::string& author, const std::string& isbn = "");
-	Book(const Book& other);
-	Book& operator=(const Book& other);
+	pushKeyWords();
+}
 
-	const std::string getISBN() const; // ?? Pokaji na Tedo
-	const std::string& getAuthor() const;
-	const StringArray& getKeyWords() const;
+Book::Book(const Book& other) : LibraryUnit(other), author(other.author)
+{
+	if (other.ISBN.hasValue())
+	{
+		ISBN.setValue(other.ISBN.getValue());
+	}
+	pushKeyWords();
+}
 
-	LibraryUnit* clone() const override;
+Book& Book::operator=(const Book& other)
+{
+	if (this != &other)
+	{
+		LibraryUnit::operator=(other);
+		author = other.author;
+		pushKeyWords();
+		if(other.ISBN.hasValue())
+			ISBN.setValue(other.ISBN.getValue());
+	}
+	return *this;
+}
 
-	//Should the setters be private ( I feel like I shouldnt mendle in how a book will be handled )
-	//I just have to give the possibility if needed
-	void pushKeyWords();
-	void setISBN(const std::string& str = generateNString(Book::ISBN_LENGTH));
-	void setAuthor(const std::string& name);
+const Optional<std::string>& Book::getISBN() const
+{
+	return ISBN;
+}
 
-	//operator>> polymorf. called from LibraryUnit
-	friend std::istream& operator>>(std::istream& is, Book& obj);
+const std::string& Book::getAuthor() const
+{
+	return author;
+}
 
-	void writeToBinary(std::ostream& os) const override;
-	void readFromBinary(std::istream& is) override;
+const StringArray& Book::getKeyWords() const
+{
+	return keyWords;
+}
 
-	void print(std::ostream& os) const override;
+LibraryUnit* Book::clone() const
+{
+	return new Book(*this);
+}
 
-protected:
+void Book::pushKeyWords()
+{
+	keyWords.push_back(title);
+	keyWords.push_back(author);
+	keyWords.push_back(std::to_string(getReleaseYear()));
+}
 
-	Optional<std::string> ISBN;
-	std::string author;
-	StringArray keyWords;
+void Book::setISBN(const std::string& str)
+{
+	if (str.length() != Book::ISBN_LENGTH)
+		throw std::invalid_argument("Given string is not in ISBN format");
 	
-	const static unsigned short ISBN_LENGTH;
-};
+	for (size_t i = 0; i < str.length(); i++)
+	{
+		if(!isdigit(str[i]))
+			throw std::invalid_argument("Given string is not in ISBN format");
+	}
+	
+	ISBN.setValue(str);
+}
+
+void Book::setAuthor(const std::string& name)
+{
+	author = name;
+}
+
+void Book::writeToBinary(std::ostream& os) const
+{
+	LibraryUnit::writeToBinary(os);
+
+	ISBN.writeToBinary(os);
+
+	FunctionsForBinary::writeString(os, author);
+	
+	FunctionsForBinary::writeStringArray(os, keyWords);
+}
+
+void Book::readFromBinary(std::istream& is)
+{
+	Book tmp;
+
+	tmp.LibraryUnit::readFromBinary(is);
+	tmp.ISBN.readFromFile(is);
+	tmp.author = FunctionsForBinary::readString(is);
+	tmp.keyWords = FunctionsForBinary::readStringArray(is);
+
+	*this = std::move(tmp);
+}
+
+void Book::serialise(std::ostream& os) const
+{
+	LibraryUnit::serialise(os);
+
+	os << author << '\n' << ISBN << '\n';
+}
+
+void Book::deserialize(std::istream& is)
+{
+	LibraryUnit::deserialize(is);
+
+	Optional<std::string> isbn;
+
+	if(!(is >> isbn)) throw std::exception("Stream failed");
+
+	is.ignore(64, '\n');
+
+	std::string author;
+	if(std::getline(is, author)) throw std::exception("Stream failed");
+
+	setISBN(isbn.getValue());
+	setAuthor(author);
+	getKeyWords();
+}
+
+void Book::print() const
+{
+	LibraryUnit::print();
+
+	std::cout << "Author - " << author << '\n';
+	if (ISBN.hasValue())
+	{		
+		std::cout << "ISBN - ";
+
+		for (size_t i = 0; i < ISBN.getValue().length(); ++i)
+		{
+			if (i == 3 || i == 5 || i == 10 || i == 12)
+				std::cout << '-';
+			std::cout << ISBN.getValue()[i];
+		}
+		std::cout << '\n';
+	}
+}
+
+std::string Book::getType() const
+{
+	return "Book";
+}
+
+unsigned Book::getPrintLines() const
+{
+	return 11;
+}
