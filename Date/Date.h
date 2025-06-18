@@ -32,6 +32,7 @@ private:
 
 	bool checkDate(unsigned date) const;
 	bool leapYear(unsigned year) const;
+	unsigned daysInMonth(unsigned month, unsigned year) const;
 
 	unsigned date = 0;
 
@@ -42,7 +43,6 @@ private:
 std::ostream& operator<<(std::ostream& os, const Date& date);
 std::istream& operator>>(std::istream& is, Date& date);
 
-//?? should I have only op<
 bool operator==(const Date& lhs, const Date& rhs);
 bool operator!=(const Date& lhs, const Date& rhs);
 bool operator<(const Date& lhs, const Date& rhs);
