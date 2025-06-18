@@ -13,23 +13,25 @@ public:
 	Book(const Book& other);
 	Book& operator=(const Book& other);
 
-	const std::string getISBN() const; // ?? Pokaji na Tedo
+	const Optional<std::string>& getISBN() const;
 	const std::string& getAuthor() const;
 	const StringArray& getKeyWords() const;
 
 	LibraryUnit* clone() const override;
 
-	//Should the setters be private ( I feel like I shouldnt mendle in how a book will be handled )
-	//I just have to give the possibility if needed
 	void pushKeyWords();
 	void setISBN(const std::string& str = generateNString(Book::ISBN_LENGTH));
 	void setAuthor(const std::string& name);
 
-	friend std::ostream& operator<<(std::ostream& os, const Book& obj);
-	friend std::istream& operator>>(std::istream& is, Book& obj);
-
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
+
+	virtual void serialise(std::ostream& os) const override;
+	virtual void deserialize(std::istream& is) override;
+
+	void print() const override;
+	std::string getType() const override;
+	unsigned getPrintLines() const override;
 
 protected:
 
