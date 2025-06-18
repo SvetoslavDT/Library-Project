@@ -2,8 +2,6 @@
 #include "User.h"
 #include "Series.h"
 
-// op>> undone // is it needed is the ?
-
 class Reader : public User
 {
 public:
@@ -25,14 +23,16 @@ public:
 		void seReturnDate(const Date& date);
 
 		friend std::ostream& operator<<(std::ostream& os, const LibraryUnitTaken& obj);
-		// friend std::istream& operator>>(std::istream& is, LibraryUnitTaken& obj);
+		friend std::istream& operator>>(std::istream& is, LibraryUnitTaken& obj);
 
 		void writeToBinary(std::ostream& os) const;
 		void readFromBinary(std::istream& is);
 
+		void print() const;
+
 	private:
 
-		LibraryUnit* unit = nullptr; // treated as const
+		LibraryUnit* unit = nullptr;
 		Date borrowDate;
 		Date returnDate;
 	};
@@ -41,7 +41,8 @@ public:
 	Reader(const std::string& name, const std::string& password);
 	Reader(const std::string& name, const std::string& password, const std::vector<LibraryUnitTaken>& arr);
 
-	const std::vector<LibraryUnitTaken> getTakenUnits() const;
+	const std::vector<LibraryUnitTaken>& getTakenUnits() const;
+	std::vector<LibraryUnitTaken>& getTakenUnits();
 
 	void setTakenLibraryUnits(const std::vector<LibraryUnitTaken>& arr);
 
@@ -49,13 +50,15 @@ public:
 
 	User* clone() const override;
 
-	//operator>> polymorf. called from User
-	// friend std::istream& operator>>(std::istream& is, Reader& obj);
-
 	void writeToBinary(std::ostream& os) const override;
 	void readFromBinary(std::istream& is) override;
 
-	void print(std::ostream& os) const override;
+	void serialise(std::ostream& os) const override;
+	void deserialize(std::istream& is) override;
+
+	void print() const override;
+	std::string getType() const override;
+	unsigned getPrintLines() const override;
 
 private:
 
