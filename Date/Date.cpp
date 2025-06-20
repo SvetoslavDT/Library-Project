@@ -222,18 +222,16 @@ bool operator>=(const Date& lhs, const Date& rhs)
 	return !(lhs < rhs);
 }
 
-Date operator-(const Date& rhs, const Date& lhs)
+Date operator-(const Date& rhs, unsigned month)
 {
-	Date temp(lhs);
-	temp -= rhs.getMonth();
-
+	Date temp = rhs;
+	temp -= month;
 	return temp;
 }
 
-Date operator+(const Date& rhs, const Date& lhs)
+Date operator+(const Date& rhs, unsigned month)
 {
-	Date temp(lhs);
-	temp += rhs.getMonth();
-
+	Date temp= rhs;
+	temp += month;
 	return temp;
 }
