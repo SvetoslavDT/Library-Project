@@ -207,8 +207,14 @@ void CommandFindUnit::execute(System& sys, const std::vector<std::string>& token
 		std::cout << std::endl;
 
 		size_t sum = 0;
-		printAllSingleLibraryUnit(result, "Book", sum);
+		bool goOn = false;
+		goOn = printAllSingleLibraryUnit(result, "Book", sum);
+		if (goOn)
+			return;
 		printAllSingleLibraryUnit(result, "Periodical", sum);
+		if (goOn)
+			return;
+
 		printAllSingleLibraryUnit(result, "Series", sum);
 	}
 }
