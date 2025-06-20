@@ -6,6 +6,16 @@ int main()
 	System::getSystem().run();
 
 
+	/*
+	* In the beginning an admin acount will be automatically made ( name - admin, password - i<3c++ ).
+	* WARNING - once entered wrong credentials, another login try will result the program closing ( bъ requirements )
+	* Command help helps very much in the process of understanding the command and will be enough.
+	* Administrators ARE NOT readers, that said, admins can not take units and return them.
+	* Some of the commands are interactive and will help giude through the intended process;
+	*/
+
+
+	// Below are tests outside of the system
 
 	/*
 	LibraryUnit* book = new Book("Ti", "Toi", "Tq", "To", 2004, 4, "Az");
