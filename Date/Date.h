@@ -50,5 +50,5 @@ bool operator>(const Date& lhs, const Date& rhs);
 bool operator<=(const Date& lhs, const Date& rhs);
 bool operator>=(const Date& lhs, const Date& rhs);
 
-Date operator-(const Date& rhs, const Date& lhs);
-Date operator+(const Date& rhs, const Date& lhs);
+Date operator-(const Date& rhs, unsigned month);
+Date operator+(const Date& rhs, unsigned month);
