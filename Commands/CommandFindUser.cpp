@@ -52,6 +52,10 @@ bool CommandFindUser::findUsers(System& sys, const std::vector<std::string>& tok
 	}
 	else if (tokens[2] == "state")
 	{
+		const Date today;
+		const Date oneMonthAgo = today - 1;
+		const Date threeMonthsAgo = today - 3;
+
 		if (tokens[3] == "overdue")
 		{
 			for (size_t i = 0; i < users.size(); ++i)
@@ -60,7 +64,7 @@ bool CommandFindUser::findUsers(System& sys, const std::vector<std::string>& tok
 				{
 					for (const auto& unit : ptr->getTakenUnits())
 					{
-						if (unit.getReturnDate() > Date{})
+						if (unit.getReturnDate() < today)
 						{
 							result.push_back(users[i]);
 							break;
@@ -80,10 +84,10 @@ bool CommandFindUser::findUsers(System& sys, const std::vector<std::string>& tok
 					count = 0;
 					for (const auto& unit : ptr->getTakenUnits())
 					{
-						if (unit.getBorrowDate() >= (Date{} - 1))
+						if (unit.getBorrowDate() >= oneMonthAgo)
 							++count;
 
-						if (count == 6)
+						if (count > 5)
 						{
 							result.push_back(users[i]);
 							break;
@@ -100,7 +104,7 @@ bool CommandFindUser::findUsers(System& sys, const std::vector<std::string>& tok
 				{
 					for (const auto& unit : ptr->getTakenUnits())
 					{
-						if (unit.getBorrowDate() + 3 < Date{})
+						if (unit.getBorrowDate() < threeMonthsAgo)
 						{
 							result.push_back(users[i]);
 							break;
