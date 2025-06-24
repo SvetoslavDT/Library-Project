@@ -143,7 +143,7 @@ void Book::print() const
 
 		for (size_t i = 0; i < ISBN.getValue().length(); ++i)
 		{
-			if (i == 3 || i == 5 || i == 10 || i == 12)
+			if (i == 3 || i == 5 || i == 10 || i == 12) // after these numbers an ISBN number contains '-'
 				std::cout << '-';
 			std::cout << ISBN.getValue()[i];
 		}
