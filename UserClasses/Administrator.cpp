@@ -63,7 +63,7 @@ bool Administrator::validEmail(const std::string& str) const
 
         if (c == '.')
         {
-            if (i == 0 || i + 1 == str.length() || str[i - 1] == '.')
+            if (i == 0 || i + 1 == str.length() || str[i - 1] == '.' || str[i - 1] == '@')
                 return false;
 
             if (seenAt && i > atPos + 0)
