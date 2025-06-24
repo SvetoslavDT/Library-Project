@@ -171,9 +171,16 @@ std::ostream& operator<<(std::ostream& os, const Date& date)
 
 std::istream& operator>>(std::istream& is, Date& date)
 {
-	unsigned newDate;
-	is >> newDate;
-	date.setDate(newDate);
+	unsigned day, month, year;
+	char dot1, dot2;
+
+	if (!(is >> day >> dot1 >> month >> dot2 >> year) || dot1 != '.' || dot2 != '.')
+		throw std::exception("Something went wrong while reading date.");
+
+	Date newDate(day, month, year);
+
+	date = newDate;
+
 	return is;
 }
 
