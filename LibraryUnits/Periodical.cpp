@@ -251,7 +251,7 @@ void Periodical::print() const
 	{
 		for (size_t i = 0; i < ISSN.getValue().length(); i++)
 		{
-			if (i == 4)
+			if (i == 4) // after this number an ISSN number contains '-'
 				std::cout << '-';
 			std::cout << ISSN.getValue()[i];
 		}
