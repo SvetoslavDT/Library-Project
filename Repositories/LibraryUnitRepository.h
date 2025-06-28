@@ -8,6 +8,8 @@ class LibraryUnitRepository
 public:
 
 	LibraryUnitRepository();
+	LibraryUnitRepository(const LibraryUnitRepository& other) = delete;
+	LibraryUnitRepository& operator=(const LibraryUnitRepository& other) = delete;
 	~LibraryUnitRepository();
 
 	std::vector<LibraryUnit*>& getUnits();
