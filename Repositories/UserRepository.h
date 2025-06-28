@@ -9,6 +9,8 @@ class UserRepository
 public:
 
 	UserRepository();
+	UserRepository(const UserRepository& other) = delete;
+	UserRepository& operator=(const UserRepository& other) = delete;
 	~UserRepository();
 
 	const std::vector<User*>& getUsers() const;
